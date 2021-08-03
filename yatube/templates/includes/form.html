@@ -1,0 +1,12 @@
+{% block form %}
+<form method="post">
+  {% csrf_token %}
+  {% include 'includes/out_fields.html' %}
+
+  <div class="col-md-6 offset-md-4">
+    <button type="submit" class="btn btn-primary">
+      {% block button %} {{submit}} {% endblock %}
+    </button>
+  </div>
+</form>
+{% endblock %}

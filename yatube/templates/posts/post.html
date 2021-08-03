@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}The Post №{{ post.id }}{% endblock title %}
+{% block content %}
+<main role="main" class="container">
+  <div class="row">
+    <div class="col-md-3 mb-3 mt-1">
+      {% include 'includes/user_card.html' with author=post.author %}
+    </div>
+    <div class="col-md-9">
+    <!-- Пост -->
+      <div class="card mb-3 mt-1 shadow-sm">
+        {% include 'includes/post_card.html' %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock content %}

@@ -1,0 +1,5 @@
+{% extends "base_auth.html" %}
+{% block title %}Зарегистрироваться{% endblock %}
+{% block header %} Зарегистрироваться {% endblock %}
+{% block errors %}{% include 'includes/out_error_fields.html' %}{% endblock %}
+{% block form %}{% include 'includes/form.html' with submit='Зарегистрироваться' %}{% endblock %}

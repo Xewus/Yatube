@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %} base-auth header {% endblock %}
+{% load user_filters %}
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-8 p-5">
+      <div class="card">
+        <div class="card-header"> 
+          {% block header %}{% endblock %}
+          {% block header_error%}{% endblock %}
+        </div>
+
+        <div class="card-body">
+          {% block errors %}{% endblock %}
+
+          {% block form %}
+          {% endblock %}
+
+          <p> {% block text %}{% endblock %} </p>
+        </div> <!-- card body -->
+      </div> <!-- card -->
+    </div> <!-- col -->
+  </div> <!-- row -->
+{% endblock %}

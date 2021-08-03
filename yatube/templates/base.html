@@ -1,0 +1,21 @@
+<!DOCTYPE html> <!-- Используется html 5 версии -->
+<html lang="ru"> <!-- Язык сайта - русский -->
+{% load static %}
+  <head>
+    {% include 'includes/head.html' %}
+    <title>{% block title %}SupaDupaFly{% endblock %}</title>
+  </head>
+
+  <body>
+    {% include 'includes/nav.html' %}
+    <main>
+      <div class="container">
+      <h1>{% block header %}{% endblock %}</h1>
+        {% block content %}
+          <!-- Содержимое страницы -->
+        {% endblock content %}        
+      </div>
+    </main>
+    {% include 'includes/footer.html' %} 
+  </body>
+</html> 

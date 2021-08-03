@@ -1,0 +1,24 @@
+<div class="card-body">
+  <p class="card-text">
+    <a href="{% url 'posts:profile' post.author.username %}">
+      <strong class="d-block text-grey_dark">
+        @{{ post.author.username }}
+      </strong>
+    </a>
+    {{ post.text|linebreaks }}
+  </p>
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="btn-group ">
+      <a class="btn btn-sm text-muted" href="{% url 'posts:post' post.author.username  post.id %}" role="button">
+        Добавить комментарий
+      </a>
+      {% if  post.author == request.user %}
+        <a class="btn btn-sm text-muted"
+          href="{% url 'posts:post_edit' post.author.username post.id %}" role="button">
+          Редактировать
+        </a>
+      {% endif %}
+    </div>
+    <small class="text-muted">  {{ post.pub_date.date }} </small>
+  </div>
+</div>
