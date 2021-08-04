@@ -54,7 +54,7 @@ def add_comment(request, post, comments):
     instance.post = post
     instance.save()
     return render(request, 'posts/post.html', {
-        'post': post, 'comments': comments, 'form': form})
+        'post': post, 'comments': comments, 'form': CommentForm()})
 
 
 @login_required
