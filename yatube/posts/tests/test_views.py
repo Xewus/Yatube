@@ -1,4 +1,8 @@
+import shutil
+import tempfile
 from django import forms
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 from yatube.settings import POSTS_ON_PAGE
@@ -9,6 +13,7 @@ class ViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         cls.USER = 'User'
         cls.USER_2 = 'Method_User'
         cls.TEXT = 'Test text'
@@ -56,17 +61,24 @@ class ViewsTest(TestCase):
             ) for i in range(POSTS_ON_PAGE + 1)
         ])
 
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
+        super().tearDownClass()
+
     def setUp(self):
         self.client_1 = Client()
         self.client_1.force_login(ViewsTest.user)
 
     def test_using_templates_of_pages(self):
-        for url, template in ViewsTest.urls_templates.items():
+        urls_templates = {**ViewsTest.urls_templates,
+                          **{'zzzzzz/': 'misc/404.html'}}
+        for url, template in urls_templates.items():
             with self.subTest(template=template):
                 response = self.client_1.get(url)
                 self.assertTemplateUsed(response, template)
 
-    def test_using_template_for_post_edit(self):
+    def test_using_templates_for_post_edit(self):
         user = User.objects.create(username=ViewsTest.USER_2)
         client_2 = Client()
         client_2.force_login(user)
@@ -80,10 +92,9 @@ class ViewsTest(TestCase):
 
     def test_context_form_for_page_new_post(self):
         response = self.client_1.get(reverse('posts:new_post'))
-        form_fields = {
-            'text': forms.fields.CharField,
-            'group': forms.fields.ChoiceField,
-        }
+        form_fields = {'text': forms.fields.CharField,
+                       'group': forms.fields.ChoiceField,
+                       'image': forms.fields.ImageField}
         for value, expected in form_fields.items():
             with self.subTest(value=value):
                 field = response.context['form'].fields[value]

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models.deletion import CASCADE
 
 User = get_user_model()
 
@@ -18,12 +19,12 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField("Текст поста")
-    pub_date = models.DateTimeField("Дата публикации",
+    text = models.TextField('Текст поста')
+    pub_date = models.DateTimeField('Дата публикации',
                                     auto_now_add=True)
     author = models.ForeignKey(User, models.CASCADE,
-                               related_name="posts",
-                               verbose_name="Автор")
+                               related_name='posts',
+                               verbose_name='Автор')
     image = models.ImageField(upload_to='posts/',
                               verbose_name='Картинка',
                               blank=True, null=True)
@@ -35,6 +36,26 @@ class Post(models.Model):
     class Meta:
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
+        ordering = ['-id']
+
+    def __str__(self) -> str:
+        return self.text[:15]
+
+
+class Comment(models.Model):
+    text = models.TextField('Текст комментария')
+    author = models.ForeignKey(User, models.CASCADE,
+                               related_name='comments',
+                               verbose_name='Автор')
+    post = models.ForeignKey(Post, on_delete=CASCADE,
+                             related_name='comments',
+                             verbose_name='Пост')
+    created = models.DateTimeField('Дата публикации',
+                                   auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Комметарий'
+        verbose_name_plural = 'Комментарии'
         ordering = ['-id']
 
     def __str__(self) -> str:

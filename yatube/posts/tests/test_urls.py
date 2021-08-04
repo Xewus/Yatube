@@ -70,7 +70,7 @@ class URLTests(TestCase):
         response = post_author.get(forbidden_url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def test_utl_matchs_template(self):
+    def test_utl_match_template(self):
         urls_templates = {**URLTests.urls_templates,
                           **{'zzzzzz/': 'misc/404.html'}}
         for url, template in urls_templates.items():

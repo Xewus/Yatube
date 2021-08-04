@@ -4,7 +4,6 @@
 {% block content %}
   <p> {{ group.description }} </p>
   {% for post in page %}
-    <h3>Автор: {{ post.author.get_full_name }}</h3>
     <div class="card mb-3 mt-1 shadow-sm">
           {% include 'includes/post_card.html' %}
         </div>  
