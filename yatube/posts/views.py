@@ -13,7 +13,7 @@ def paginator_in_view(request, post_list):
     return paginator.get_page(page_number)
 
 
-#@cache_page(20, key_prefix='index_page')
+@cache_page(20, key_prefix='index_page')
 def index(request):
     post_list = Post.objects.all()
     page = paginator_in_view(request, post_list)
@@ -29,37 +29,40 @@ def group_posts(request, slug=''):
 
 
 def profile(request, username):
-    user = get_object_or_404(User, username=username)
-    following = user.following.filter(user=request.user).exists()
-    post_list = user.posts.all()
+    author = get_object_or_404(User, username=username)
+    post_list = author.posts.all()
     page = paginator_in_view(request, post_list)
-    context = {'author': user, 'page': page, 'following': following}
+    following = False
+    if request.user.is_authenticated:
+        following = author.following.filter(user=request.user).exists()
+    context = {'author': author, 'page': page, 'following': following}
     return render(request, 'posts/profile.html', context)
 
 
 def post_view(request, username, post_id):
+    if request.user.is_authenticated:
+        return add_comment(request, username, post_id)
     post = get_object_or_404(Post, id=post_id, author__username=username)
     comments = Comment.objects.filter(post__id=post_id)
-    if request.user.is_authenticated:
-        return add_comment(request, post, comments)
     context = {'post': post, 'comments': comments, 'form': CommentForm()}
     return render(request, 'posts/post.html', context)
 
 
 @login_required
-def add_comment(request, post, comments):
+def add_comment(request, username, post_id):
+    post = get_object_or_404(Post, id=post_id, author__username=username)
     form = CommentForm(request.POST or None)
     if not form.is_valid():
-        return render(request, 'posts/post.html', {'post': post,
-                                                   'comments': comments,
-                                                   'form': form})
+        return render(
+            request, 'posts/post.html', {'post': post,
+                                         'comments': post.comments.all(),
+                                         'form': form}
+        )
     instance = form.save(commit=False)
     instance.author = request.user
     instance.post = post
     instance.save()
-    return render(request, 'posts/post.html', {'post': post,
-                                               'comments': comments,
-                                               'form': CommentForm()})
+    return redirect('posts:post', username, post_id)
 
 
 @login_required
@@ -99,7 +102,7 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     lock_repeat = request.user.username + username
-    if request.user != username and not Follow.objects.filter(
+    if request.user.username != username and not Follow.objects.filter(
         lock_repeat=lock_repeat
     ).exists():
         Follow.objects.create(user=request.user,

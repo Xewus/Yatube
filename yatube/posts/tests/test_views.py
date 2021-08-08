@@ -13,6 +13,7 @@ class ViewsTest(TestCase):
         cls.USER = 'User'
         cls.USER_2 = 'Method_User'
         cls.TEXT = 'Test text'
+        cls.TEXT_2 = 'Test text_2'
         cls.GROUP = 'Test group'
         cls.GROUP_2 = 'Test group 2'
         cls.DESC = 'Test description'
@@ -53,7 +54,7 @@ class ViewsTest(TestCase):
 
         Post.objects.bulk_create([
             Post(
-                text=cls.TEXT, author=cls.user, group=cls.group_1
+                text=cls.TEXT_2, author=cls.user, group=cls.group_1
             ) for i in range(POSTS_ON_PAGE + 1)
         ])
 
@@ -113,10 +114,13 @@ class ViewsTest(TestCase):
         self.assertEqual(posts_group_2, 0)
 
     def test_cache(self):
+        posts_count = Post.objects.count()
         response = self.client_1.get(reverse('posts:index')).content
-        print('R1-=', response[0])
-        print('CAHE-=', cache.get('index_page'))
-        response_2 = self.client_1.get(reverse('posts:index')).content
-#        print('R2-=', response_2.decode())
-   #     self.assertEqual(Post.objects.count(), posts_count + 1)
-    #    self.assertEqual(self.client_1.get(reverse('posts:index')).context[0], response)
+        Post.objects.create(
+            text=ViewsTest.TEXT, author=ViewsTest.user, group=ViewsTest.group_2)
+        self.assertEqual(Post.objects.count(), posts_count + 1)
+        self.assertEqual(
+            response, self.client_1.get(reverse('posts:index')).content)
+        cache.clear()
+        self.assertNotEqual(
+            response, self.client_1.get(reverse('posts:index')).content)
