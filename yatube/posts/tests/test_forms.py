@@ -220,12 +220,6 @@ class FormTest(TestCase):
         )
         self.assertEqual(Post.objects.count(), self.posts_count)
 
-    def test_unable_self_follow(self):
-        follow_count = Follow.objects.count()
-        Follow.objects.create(user=FormTest.user,
-                              author=FormTest.user)
-        self.assertEqual(Follow.objects.count(), follow_count)
-
     def test_follow(self):
         follow_count = Follow.objects.count()
         Follow.objects.create(user=FormTest.user_2,

@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.db.models.deletion import CASCADE
 
 User = get_user_model()
 
@@ -28,7 +27,7 @@ class Post(models.Model):
     image = models.ImageField(upload_to='posts/',
                               verbose_name='Картинка',
                               blank=True, null=True)
-    group = models.ForeignKey(Group, on_delete=models.PROTECT,
+    group = models.ForeignKey(Group, models.PROTECT,
                               related_name='posts',
                               verbose_name='Сообщество',
                               blank=True, null=True)
@@ -47,7 +46,7 @@ class Comment(models.Model):
     author = models.ForeignKey(User, models.CASCADE,
                                related_name='comments',
                                verbose_name='Автор')
-    post = models.ForeignKey(Post, on_delete=CASCADE,
+    post = models.ForeignKey(Post, models.CASCADE,
                              related_name='comments',
                              verbose_name='Пост')
     created = models.DateTimeField('Дата публикации',
@@ -74,4 +73,4 @@ class Follow(models.Model):
         unique_together = 'user', 'author'
 
     def __str__(self) -> str:
-        return self.lock_repeat
+        return f'{self.user.username} --> {self.author.username}'

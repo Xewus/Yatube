@@ -33,11 +33,10 @@ class ModelTests(TestCase):
         cls.follow = Follow.objects.create(
             user=cls.user_2,
             author=cls.user,
-            lock_repeat='Qwertyqaz'
         )
         cls.model_str = {
             cls.comment: cls.comment.text[:15],
-            cls.follow: cls.follow.lock_repeat,
+            cls.follow: 'qaz --> Qwerty',
             cls.group: cls.group.title,
             cls.post: cls.post.text[:15],
         }
