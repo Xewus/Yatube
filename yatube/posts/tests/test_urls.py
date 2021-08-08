@@ -74,7 +74,7 @@ class URLTests(TestCase):
 
     def test_utl_match_template(self):
         urls_templates = {**URLTests.urls_templates,
-                          **{'zzzzzz/': 'misc/404.html'}}
+                          **{'zzzzzzz/': 'misc/404.html'}}
         for url, template in urls_templates.items():
             with self.subTest(url=url):
                 response = self.auhtorized_client.get(url)
