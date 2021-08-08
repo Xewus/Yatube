@@ -1,9 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.cache import cache_page
 from yatube.settings import POSTS_ON_PAGE
 from .forms import CommentForm, PostForm
-from .models import Comment, Group, Post, User
+from .models import Comment, Follow, Group, Post, User
 
 
 def paginator_in_view(request, post_list):
@@ -12,6 +13,7 @@ def paginator_in_view(request, post_list):
     return paginator.get_page(page_number)
 
 
+@cache_page(20, key_prefix='index_page')
 def index(request):
     post_list = Post.objects.all()
     page = paginator_in_view(request, post_list)
@@ -28,33 +30,37 @@ def group_posts(request, slug=''):
 
 def profile(request, username):
     user = get_object_or_404(User, username=username)
+    following = user.following.filter(user=request.user).exists()
     post_list = user.posts.all()
     page = paginator_in_view(request, post_list)
-    context = {'author': user, 'page': page}
+    context = {'author': user, 'page': page, 'following': following}
     return render(request, 'posts/profile.html', context)
 
 
 def post_view(request, username, post_id):
     post = get_object_or_404(Post, id=post_id, author__username=username)
     comments = Comment.objects.filter(post__id=post_id)
-    if not request.user.is_authenticated:
-        return render(request, 'posts/post.html', {
-            'post': post, 'comments': comments, 'form': CommentForm()})
-    return add_comment(request, post, comments)
+    if request.user.is_authenticated:
+        return add_comment(request, post, comments)
+    return render(request, 'posts/post.html', {'post': post,
+                                               'comments': comments,
+                                               'form': CommentForm()})
 
 
 @login_required
 def add_comment(request, post, comments):
     form = CommentForm(request.POST or None)
     if not form.is_valid():
-        return render(request, 'posts/post.html',
-                      {'post': post, 'comments': comments, 'form': form})
+        return render(request, 'posts/post.html', {'post': post,
+                                                   'comments': comments,
+                                                   'form': form})
     instance = form.save(commit=False)
     instance.author = request.user
     instance.post = post
     instance.save()
-    return render(request, 'posts/post.html', {
-        'post': post, 'comments': comments, 'form': CommentForm()})
+    return render(request, 'posts/post.html', {'post': post,
+                                               'comments': comments,
+                                               'form': CommentForm()})
 
 
 @login_required
@@ -81,6 +87,34 @@ def post_edit(request, username, post_id):
         return render(request, 'posts/new.html', context)
     form.save()
     return redirect('posts:post', username, post_id)
+
+
+@login_required
+def follow_index(request):
+    authors = [i.author for i in Follow.objects.filter(user=request.user)]
+    post_list = Post.objects.filter(author__in=authors)
+    page = paginator_in_view(request, post_list)
+    return render(request, 'posts/follow.html', {'page': page})
+
+
+@login_required
+def profile_follow(request, username):
+    lock_repeat = request.user.username + username
+    if request.user != username and not Follow.objects.filter(
+        lock_repeat=lock_repeat).exists():
+        Follow.objects.create(user=request.user,
+                              author=User.objects.get(username=username),
+                              lock_repeat=lock_repeat)
+    return profile(request, username)
+
+
+@login_required
+def profile_unfollow(request, username):
+    lock_repeat = request.user.username + username
+    if Follow.objects.filter(lock_repeat=lock_repeat).exists():
+        Follow.objects.get(user=request.user,
+                           author=User.objects.get(username=username)).delete()
+    return profile(request, username)
 
 
 def page_not_found(request, exception):

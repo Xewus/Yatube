@@ -98,6 +98,7 @@ class FormTest(TestCase):
         uploaded = SimpleUploadedFile(name='small_1.gif',
                                       content=small_gif,
                                       content_type='image/gif')
+
         response = self.authorized_client.post(
             reverse('posts:new_post'),
             data={'group': FormTest.group_1.id,
@@ -108,8 +109,10 @@ class FormTest(TestCase):
         self.assertEqual(Post.objects.count(), self.posts_count + 1)
         self.assertRedirects(
             response, reverse('posts:index'), HTTPStatus.FOUND)
-        self.assertTrue(Post.objects.filter(
-            text=FormTest.TEXT, group=FormTest.group_1))
+        self.assertTrue(Post.objects.filter(text=FormTest.TEXT,
+                                            author=self.user,
+                                            group=FormTest.group_1,
+                                            image='posts/small_1.gif'))
         self.assertFalse(Post.objects.filter(
             text=FormTest.TEXT, group=FormTest.group_2))
 

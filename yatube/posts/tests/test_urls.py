@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from django.core.cache import cache
 from django.test import TestCase, Client
 from django.urls import reverse
 from posts.models import Group, Post, User
@@ -37,6 +38,7 @@ class URLTests(TestCase):
         self.user = User.objects.create_user(username='Method_User')
         self.auhtorized_client = Client()
         self.auhtorized_client.force_login(self.user)
+        cache.clear()
 
     def test_pages_any_user(self):
         for url in URLTests.urls_templates_guest:

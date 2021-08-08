@@ -1,19 +1,15 @@
-import shutil
-import tempfile
 from django import forms
-from django.conf import settings
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
 from yatube.settings import POSTS_ON_PAGE
-from posts.models import Group, Post, User
+from ..models import Group, Post, User
 
 
 class ViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         cls.USER = 'User'
         cls.USER_2 = 'Method_User'
         cls.TEXT = 'Test text'
@@ -61,14 +57,10 @@ class ViewsTest(TestCase):
             ) for i in range(POSTS_ON_PAGE + 1)
         ])
 
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
-        super().tearDownClass()
-
     def setUp(self):
         self.client_1 = Client()
         self.client_1.force_login(ViewsTest.user)
+        cache.clear()
 
     def test_using_templates_of_pages(self):
         urls_templates = {**ViewsTest.urls_templates,
@@ -119,3 +111,12 @@ class ViewsTest(TestCase):
         posts_group_2 = Post.objects.filter(group=ViewsTest.group_2.id).count()
         self.assertEqual(posts_group_1, POSTS_ON_PAGE + 1)
         self.assertEqual(posts_group_2, 0)
+
+    def test_cache(self):
+        response = self.client_1.get(reverse('posts:index')).content
+        print('R1-=', response[0])
+        print('CAHE-=', cache.get('index_page'))
+        response_2 = self.client_1.get(reverse('posts:index')).content
+        print('R2-=', response_2.decode())
+   #     self.assertEqual(Post.objects.count(), posts_count + 1)
+    #    self.assertEqual(self.client_1.get(reverse('posts:index')).context[0], response)

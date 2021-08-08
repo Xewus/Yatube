@@ -60,3 +60,18 @@ class Comment(models.Model):
 
     def __str__(self) -> str:
         return self.text[:15]
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(User, models.CASCADE,
+                             related_name="follower",
+                             verbose_name='Подписчик')
+    author = models.ForeignKey(User, models.CASCADE,
+                               related_name="following",
+                               verbose_name='Автор')
+    lock_repeat = models.CharField('Запрет повтора подписки',
+                                   max_length=100,
+                                   unique=True)
+
+    def __str__(self) -> str:
+        return f'{self.user.username} --> {self.author.username}'

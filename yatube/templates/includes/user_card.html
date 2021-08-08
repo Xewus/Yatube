@@ -12,8 +12,8 @@
   <ul class="list-group list-group-flush">
     <li class="list-group-item">
       <div class="h6 text-muted">
-        Подписчиков: XXX <br>
-        Подписан: XXX
+        Подписчиков: {{ author.following.count }} <br>
+        Подписан: {{ author.follower.count }}
       </div>
     </li>
     <li class="list-group-item">
@@ -21,6 +21,21 @@
         <!--Количество записей -->
         Записей: {{ author.posts.count }}
       </div>
+      <li class="list-group-item">
+  {% if following %}
+    <a
+      class="btn btn-lg btn-light"
+      href="{% url 'posts:profile_unfollow' author.username %}" role="button">
+      Отписаться
+    </a>
+  {% else %}
+    <a
+      class="btn btn-lg btn-primary"
+      href="{% url 'posts:profile_follow' author.username %}" role="button">
+      Подписаться
+    </a>
+  {% endif %}
+</li>
     </li>
   </ul>
 </div>
