@@ -13,7 +13,7 @@ def paginator_in_view(request, post_list):
     return paginator.get_page(page_number)
 
 
-@cache_page(20, key_prefix='index_page')
+#@cache_page(20, key_prefix='index_page')
 def index(request):
     post_list = Post.objects.all()
     page = paginator_in_view(request, post_list)
@@ -42,9 +42,8 @@ def post_view(request, username, post_id):
     comments = Comment.objects.filter(post__id=post_id)
     if request.user.is_authenticated:
         return add_comment(request, post, comments)
-    return render(request, 'posts/post.html', {'post': post,
-                                               'comments': comments,
-                                               'form': CommentForm()})
+    context = {'post': post, 'comments': comments, 'form': CommentForm()}
+    return render(request, 'posts/post.html', context)
 
 
 @login_required
@@ -101,7 +100,8 @@ def follow_index(request):
 def profile_follow(request, username):
     lock_repeat = request.user.username + username
     if request.user != username and not Follow.objects.filter(
-        lock_repeat=lock_repeat).exists():
+        lock_repeat=lock_repeat
+    ).exists():
         Follow.objects.create(user=request.user,
                               author=User.objects.get(username=username),
                               lock_repeat=lock_repeat)

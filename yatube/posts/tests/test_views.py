@@ -117,6 +117,6 @@ class ViewsTest(TestCase):
         print('R1-=', response[0])
         print('CAHE-=', cache.get('index_page'))
         response_2 = self.client_1.get(reverse('posts:index')).content
-        print('R2-=', response_2.decode())
+#        print('R2-=', response_2.decode())
    #     self.assertEqual(Post.objects.count(), posts_count + 1)
     #    self.assertEqual(self.client_1.get(reverse('posts:index')).context[0], response)
