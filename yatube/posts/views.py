@@ -101,23 +101,17 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    lock_repeat = request.user.username + username
-    if request.user.username != username and not Follow.objects.filter(
-        lock_repeat=lock_repeat
-    ).exists():
-        Follow.objects.create(user=request.user,
-                              author=User.objects.get(username=username),
-                              lock_repeat=lock_repeat)
-    return profile(request, username)
+    if request.user.username != username:
+        user = get_object_or_404(User, username=request.user.username)
+        author = get_object_or_404(User, username=username)
+        Follow.objects.get_or_create(user=user, author=author)
+    return redirect('posts:profile', username)
 
 
 @login_required
 def profile_unfollow(request, username):
-    lock_repeat = request.user.username + username
-    if Follow.objects.filter(lock_repeat=lock_repeat).exists():
-        Follow.objects.get(user=request.user,
-                           author=User.objects.get(username=username)).delete()
-    return profile(request, username)
+    Follow.objects.filter(user=request.user, author=User.objects.get(username=username)).delete()
+    return redirect('posts:profile', username)
 
 
 def page_not_found(request, exception):

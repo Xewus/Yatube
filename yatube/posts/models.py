@@ -69,9 +69,9 @@ class Follow(models.Model):
     author = models.ForeignKey(User, models.CASCADE,
                                related_name="following",
                                verbose_name='Автор')
-    lock_repeat = models.CharField('Запрет повтора подписки',
-                                   max_length=100,
-                                   unique=True)
+
+    class Meta:
+        unique_together = 'user', 'author'
 
     def __str__(self) -> str:
         return self.lock_repeat

@@ -5,8 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from http import HTTPStatus
 from django.test import Client, TestCase
 from django.urls import reverse
-from ..forms import CommentForm, PostForm
-from ..models import Comment, Group, Post, User
+from ..models import Comment, Follow, Group, Post, User
 
 
 class FormTest(TestCase):
@@ -15,6 +14,7 @@ class FormTest(TestCase):
         super().setUpClass()
         settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         cls.USER = 'User'
+        cls.USER_2 = 'User_2'
         cls.TEXT = 'Test text'
         cls.TEXT_2 = 'Test text 2'
         cls.GROUP = 'Test group'
@@ -24,6 +24,7 @@ class FormTest(TestCase):
         cls.SLUG = 'test_group'
         cls.SLUG_2 = 'test_group_2'
         cls.user = User.objects.create(username=cls.USER)
+        cls.user_2 = User.objects.create(username=cls.USER_2)
         cls.POST = Post.objects.create(text=cls.TEXT,
                                        author=cls.user)
 
@@ -37,7 +38,6 @@ class FormTest(TestCase):
             description=cls.DESC_2,
             slug=cls.SLUG_2
         )
-        cls.form = PostForm()
 
     @classmethod
     def tearDownClass(cls):
@@ -196,7 +196,7 @@ class FormTest(TestCase):
         )
         self.assertRedirects(
             response,
-            f'/auth/login/?next=/{FormTest.USER}/{FormTest.POST.id}/comment/',
+            f'/auth/login/?next=/{FormTest.USER}/{FormTest.POST.id}/comment',
             HTTPStatus.FOUND)
         self.assertEqual(
             Comment.objects.filter(post=FormTest.POST.id).count(), comments)
@@ -219,3 +219,24 @@ class FormTest(TestCase):
             Comment.objects.filter(post=FormTest.POST.id).count(), comments + 1
         )
         self.assertEqual(Post.objects.count(), self.posts_count)
+
+    def test_unable_self_follow(self):
+        follow_count = Follow.objects.count()
+        Follow.objects.create(user=FormTest.user,
+                              author=FormTest.user)
+        self.assertEqual(Follow.objects.count(), follow_count)
+
+    def test_follow(self):
+        follow_count = Follow.objects.count()
+        Follow.objects.create(user=FormTest.user_2,
+                              author=FormTest.user)
+        self.assertEqual(Follow.objects.count(), follow_count + 1)
+        self.assertTrue(Follow.objects.filter(user=FormTest.user_2,
+                                              author=FormTest.user))
+        self.assertFalse(Follow.objects.filter(user=FormTest.user,
+                                               author=FormTest.user_2))
+        Follow.objects.get(user=FormTest.user_2,
+                           author=FormTest.user,).delete()
+        self.assertEqual(Follow.objects.count(), follow_count)
+        self.assertFalse(Follow.objects.filter(user=FormTest.user_2,
+                                               author=FormTest.user))
