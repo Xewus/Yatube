@@ -126,7 +126,7 @@ class ViewsTest(TestCase):
         self.assertNotEqual(
             response, self.client_1.get(reverse('posts:index')).content)
 
-    def test_comes_to_follower(self):
+    def test_comes_to_follower_notfollower(self):
         self.client_1.post(reverse(
             'posts:profile_follow', kwargs={'username': ViewsTest.USER_2}),
             follow=True)
@@ -134,3 +134,11 @@ class ViewsTest(TestCase):
         response = self.client_1.get(reverse('posts:follow_index'))
         first_object = response.context['page'][0]
         self.assertEqual(first_object, Post.objects.first())
+
+        user = User.objects.create(username='unfollow')
+        post_coumt = Post.objects.count()
+        Post.objects.create(text=ViewsTest.TEXT, author=user)
+        response = self.client_1.get(reverse('posts:follow_index'))
+        first_object = response.context['page'][0]
+        self.assertEqual(post_coumt + 1, Post.objects.count())
+        self.assertNotEqual(first_object, Post.objects.first())
