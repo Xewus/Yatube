@@ -85,7 +85,7 @@ def post_edit(request, username, post_id):
     form = PostForm(request.POST or None,
                     files=request.FILES or None, instance=post)
     if not form.is_valid():
-        context = {'form': form, 'is_edit': True}
+        context = {'form': form, 'is_edit': True, 'post': post}
         return render(request, 'posts/new.html', context)
     form.save()
     return redirect('posts:post', username, post_id)
