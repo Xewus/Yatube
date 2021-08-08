@@ -220,17 +220,26 @@ class FormTest(TestCase):
         )
         self.assertEqual(Post.objects.count(), self.posts_count)
 
-    def test_follow(self):
+    def test_follow_unfollow_selffollow(self):
         follow_count = Follow.objects.count()
-        Follow.objects.create(user=FormTest.user_2,
-                              author=FormTest.user)
+        self.authorized_client.post(reverse(
+            'posts:profile_follow', kwargs={'username': FormTest.USER_2}),
+            follow=True)
+
         self.assertEqual(Follow.objects.count(), follow_count + 1)
-        self.assertTrue(Follow.objects.filter(user=FormTest.user_2,
-                                              author=FormTest.user))
-        self.assertFalse(Follow.objects.filter(user=FormTest.user,
-                                               author=FormTest.user_2))
-        Follow.objects.get(user=FormTest.user_2,
-                           author=FormTest.user,).delete()
-        self.assertEqual(Follow.objects.count(), follow_count)
+        self.assertTrue(Follow.objects.filter(user=FormTest.user,
+                                              author=FormTest.user_2))
         self.assertFalse(Follow.objects.filter(user=FormTest.user_2,
                                                author=FormTest.user))
+
+        self.authorized_client.post(reverse(
+            'posts:profile_unfollow', kwargs={'username': FormTest.USER_2}),
+            follow=True)
+        self.assertEqual(Follow.objects.count(), follow_count)
+        self.assertFalse(Follow.objects.filter(user=FormTest.user,
+                                               author=FormTest.user_2))
+
+        self.authorized_client.post(reverse(
+            'posts:profile_unfollow', kwargs={'username': FormTest.USER}),
+            follow=True)
+        self.assertEqual(Follow.objects.count(), follow_count)

@@ -11,7 +11,7 @@ class ViewsTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.USER = 'User'
-        cls.USER_2 = 'Method_User'
+        cls.USER_2 = 'User_2'
         cls.TEXT = 'Test text'
         cls.TEXT_2 = 'Test text_2'
         cls.GROUP = 'Test group'
@@ -51,6 +51,7 @@ class ViewsTest(TestCase):
             slug=cls.SLUG_2)
 
         cls.user = User.objects.create(username=cls.USER)
+        cls.user_2 = User.objects.create(username=cls.USER_2)
 
         Post.objects.bulk_create([
             Post(
@@ -72,9 +73,8 @@ class ViewsTest(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_using_templates_for_post_edit(self):
-        user = User.objects.create(username=ViewsTest.USER_2)
         client_2 = Client()
-        client_2.force_login(user)
+        client_2.force_login(ViewsTest.user_2)
         url_edit = reverse('posts:post_edit', kwargs={
             'username': ViewsTest.USER, "post_id": POSTS_ON_PAGE + 1})
 
@@ -125,3 +125,12 @@ class ViewsTest(TestCase):
         cache.clear()
         self.assertNotEqual(
             response, self.client_1.get(reverse('posts:index')).content)
+
+    def test_comes_to_follower(self):
+        self.client_1.post(reverse(
+            'posts:profile_follow', kwargs={'username': ViewsTest.USER_2}),
+            follow=True)
+        Post.objects.create(text=ViewsTest.TEXT, author=ViewsTest.user_2)
+        response = self.client_1.get(reverse('posts:follow_index'))
+        first_object = response.context['page'][0]
+        self.assertEqual(first_object, Post.objects.first())
