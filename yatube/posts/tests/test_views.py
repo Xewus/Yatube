@@ -117,7 +117,8 @@ class ViewsTest(TestCase):
         posts_count = Post.objects.count()
         response = self.client_1.get(reverse('posts:index')).content
         Post.objects.create(
-            text=ViewsTest.TEXT, author=ViewsTest.user, group=ViewsTest.group_2)
+            text=ViewsTest.TEXT, author=ViewsTest.user, group=ViewsTest.group_2
+        )
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertEqual(
             response, self.client_1.get(reverse('posts:index')).content)

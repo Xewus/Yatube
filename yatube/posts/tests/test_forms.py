@@ -5,8 +5,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from http import HTTPStatus
 from django.test import Client, TestCase
 from django.urls import reverse
-from posts.forms import PostForm
-from posts.models import Group, Post, User
+from ..forms import CommentForm, PostForm
+from ..models import Comment, Group, Post, User
 
 
 class FormTest(TestCase):
@@ -23,6 +23,9 @@ class FormTest(TestCase):
         cls.DESC_2 = 'Test description 2'
         cls.SLUG = 'test_group'
         cls.SLUG_2 = 'test_group_2'
+        cls.user = User.objects.create(username=cls.USER)
+        cls.POST = Post.objects.create(text=cls.TEXT,
+                                       author=cls.user)
 
         cls.group_1 = Group.objects.create(
             title=cls.GROUP,
@@ -44,9 +47,8 @@ class FormTest(TestCase):
 
     def setUp(self):
         self.guest_client = Client()
-        self.user = User.objects.create(username=FormTest.USER)
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        self.authorized_client.force_login(FormTest.user)
         self.posts_count = Post.objects.count()
 
     def test_unable_create_post_by_anonim(self):
@@ -183,3 +185,37 @@ class FormTest(TestCase):
                 self.assertTrue(Post.objects.filter(text=FormTest.TEXT,
                                                     author=self.user,
                                                     group=FormTest.group_1))
+
+    def test_unable_create_comment_by_anonim(self):
+        comments = Comment.objects.filter(post=FormTest.POST.id).count()
+        response = self.guest_client.post(
+            reverse('posts:add_comment', kwargs={
+                    'username': FormTest.USER, 'post_id': FormTest.POST.id}),
+            data={'text': FormTest.TEXT_2},
+            follow=True
+        )
+        self.assertRedirects(
+            response,
+            f'/auth/login/?next=/{FormTest.USER}/{FormTest.POST.id}/comment/',
+            HTTPStatus.FOUND)
+        self.assertEqual(
+            Comment.objects.filter(post=FormTest.POST.id).count(), comments)
+        self.assertEqual(Post.objects.count(), self.posts_count)
+
+    def test_create_comment(self):
+        comments = Comment.objects.filter(post=FormTest.POST.id).count()
+        response = self.authorized_client.post(
+            reverse('posts:add_comment', kwargs={
+                    'username': FormTest.USER, 'post_id': FormTest.POST.id}),
+            data={'text': FormTest.TEXT_2},
+            follow=True
+        )
+        self.assertRedirects(
+            response,
+            f'/{FormTest.USER}/{FormTest.POST.id}/',
+            HTTPStatus.FOUND
+        )
+        self.assertEqual(
+            Comment.objects.filter(post=FormTest.POST.id).count(), comments + 1
+        )
+        self.assertEqual(Post.objects.count(), self.posts_count)

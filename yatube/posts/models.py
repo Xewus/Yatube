@@ -74,4 +74,4 @@ class Follow(models.Model):
                                    unique=True)
 
     def __str__(self) -> str:
-        return f'{self.user.username} --> {self.author.username}'
+        return self.lock_repeat
