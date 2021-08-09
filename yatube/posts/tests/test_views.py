@@ -1,10 +1,14 @@
 from django import forms
 from django.core.cache import cache
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from ..models import Follow, Group, Post, User
 from yatube.settings import POSTS_ON_PAGE
+from ..models import Follow, Group, Post, User
+
+
+TEST_DIR = settings.BASE_DIR + '/test_data'
 
 
 class ViewsTest(TestCase):
@@ -27,13 +31,13 @@ class ViewsTest(TestCase):
                 'slug': cls.SLUG}): 'posts/group.html',
             reverse('posts:profile', kwargs={
                 'username': cls.USER}): 'posts/profile.html',
-   #         reverse('posts:post', kwargs={
-     #           'username': cls.USER, 'post_id': 1}): 'posts/post.html',
+            reverse('posts:post', kwargs={
+                    'username': cls.USER, 'post_id': 1}): 'posts/post.html',
         }
         cls.urls_templates_user = {
             reverse('posts:new_post'): 'posts/new.html'
         }
-        cls.url_with_paginator = (
+        cls.urls_with_paginator = (
             reverse('posts:index'),
             reverse('posts:group', kwargs={'slug': cls.SLUG}),
             reverse('posts:profile', kwargs={'username': cls.USER}),
@@ -95,14 +99,14 @@ class ViewsTest(TestCase):
                 self.assertIsInstance(field, expected)
 
     def test_paginator(self):
-        for url in ViewsTest.url_with_paginator:
+        for url in ViewsTest.urls_with_paginator:
             with self.subTest(url=url):
                 response = self.client_1.get(url)
                 self.assertEqual(len(response.context['page']),
                                  POSTS_ON_PAGE)
 
     def test_out_last_posts_on_page(self):
-        for url in ViewsTest.url_with_paginator:
+        for url in ViewsTest.urls_with_paginator:
             with self.subTest(url=url):
                 response = self.client_1.get(url)
                 first_object = response.context['page'][0]
@@ -145,6 +149,7 @@ class ViewsTest(TestCase):
         self.assertEqual(content_1, content_2)
         self.assertEqual(Post.objects.count(), posts_count + 1)
 
+    @override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
     def test_context_with_image(self):
         small_gif = (b'\x47\x49\x46\x38\x39\x61\x02\x00'
                      b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -159,8 +164,9 @@ class ViewsTest(TestCase):
                                    author=ViewsTest.user,
                                    group=ViewsTest.group_1,
                                    image=uploaded)
-
-        for url in ViewsTest.urls_templates_guest:
+        urls = (*ViewsTest.urls_with_paginator,
+                reverse('posts:profile', kwargs={'username': ViewsTest.USER}))
+        for url in urls:
             with self.subTest(url=url):
                 context = self.client_1.get(url).context.get('page')[0]
                 self.assertEqual(context.text, post.text)

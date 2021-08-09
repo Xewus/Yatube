@@ -1,14 +1,12 @@
-import shutil
-import tempfile
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from http import HTTPStatus
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from ..models import Comment, Follow, Group, Post, User
 
 
-settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+TEST_DIR = settings.BASE_DIR + '/test_data'
 
 
 class FormTest(TestCase):
@@ -40,11 +38,6 @@ class FormTest(TestCase):
             description=cls.DESC_2,
             slug=cls.SLUG_2
         )
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
-        super().tearDownClass()
 
     def setUp(self):
         self.guest_client = Client()
@@ -91,6 +84,7 @@ class FormTest(TestCase):
         self.assertFalse(Post.objects.filter(
             text=FormTest.TEXT, group=FormTest.group_2))
 
+    @override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
     def test_create_post_with_picture(self):
         small_gif = (b'\x47\x49\x46\x38\x39\x61\x02\x00'
                      b'\x01\x00\x80\x00\x00\x00\x00\x00'
