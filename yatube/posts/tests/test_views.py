@@ -1,3 +1,4 @@
+import shutil
 from django import forms
 from django.core.cache import cache
 from django.conf import settings
@@ -5,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from yatube.settings import POSTS_ON_PAGE
-from ..models import Follow, Group, Post, User
+from ..models import Comment, Follow, Group, Post, User
 
 
 TEST_DIR = settings.BASE_DIR + '/test_data'
@@ -173,3 +174,30 @@ class ViewsTest(TestCase):
                 self.assertEqual(context.author, post.author)
                 self.assertEqual(context.group, post.group)
                 self.assertEqual(context.image, post.image)
+
+    def test_unable_create_comment_by_anonim(self):
+        client = Client()
+        comments = Comment.objects.count()
+        posts_count = Post.objects.count()
+        client.post(
+            reverse('posts:add_comment', kwargs={
+                    'username': ViewsTest.USER, 'post_id': 1}),
+            data={'text': ViewsTest.TEXT},
+            follow=True
+        )
+        # Комментарий  не создался
+        self.assertFalse(Comment.objects.filter(post=1,
+                                                author=ViewsTest.user,
+                                                text=ViewsTest.TEXT))
+        # Количество комметариев не должно измениться
+        self.assertEqual(Comment.objects.count(), comments)
+        # На всякий случай проверим, что количество постов не изменилось
+        self.assertEqual(Post.objects.count(), posts_count)
+
+
+def tearDownModule():
+    print("\nDeleting temporary files...\n")
+    try:
+        shutil.rmtree(TEST_DIR)
+    except OSError:
+        pass

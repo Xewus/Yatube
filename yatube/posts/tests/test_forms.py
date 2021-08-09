@@ -1,3 +1,4 @@
+import shutil
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from http import HTTPStatus
@@ -120,7 +121,7 @@ class FormTest(TestCase):
                      b'\x00\x00\x00\x2C\x00\x00\x00\x00'
                      b'\x02\x00\x01\x00\x00\x02\x02\x0C'
                      b'\x0A\x00\x3B')
-        uploaded = SimpleUploadedFile(name='small_2.gif',
+        uploaded = SimpleUploadedFile(name='smalll.gif',
                                       content=small_gif,
                                       content_type='image/gif')
         Post.objects.create(
@@ -152,7 +153,7 @@ class FormTest(TestCase):
         self.assertTrue(Post.objects.filter(text=FormTest.TEXT_2,
                                             author=self.user,
                                             group=FormTest.group_2,
-                                            image='posts/small_2.gif'))
+                                            image='posts/smalll.gif'))
         self.assertEqual(posts_count_group_1 - 1, Post.objects.filter(
             group=FormTest.group_1).count())
         self.assertEqual(posts_count_group_2 + 1, Post.objects.filter(
@@ -260,3 +261,11 @@ class FormTest(TestCase):
         # Подписка с переданными данными не должна существовать
         self.assertFalse(Follow.objects.filter(user=FormTest.user,
                                                author=FormTest.user))
+
+
+def tearDownModule():
+    print("\nDeleting temporary files...\n")
+    try:
+        shutil.rmtree(TEST_DIR)
+    except OSError:
+        pass
