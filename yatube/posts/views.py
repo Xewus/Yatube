@@ -49,8 +49,6 @@ def post_view(request, username, post_id):
 
 
 @login_required
-# функция создана и принимает данные согласно тестам
-# изначально весь функционал был реализован в post_view()
 def add_comment(request, username, post_id):
     post = get_object_or_404(Post, id=post_id, author__username=username)
     form = CommentForm(request.POST or None)
@@ -102,17 +100,20 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    if request.user.username != username:
-        user = get_object_or_404(User, username=request.user.username)
-        author = get_object_or_404(User, username=username)
-        Follow.objects.get_or_create(user=user, author=author)
+    author = get_object_or_404(User, username=username)
+    if request.user != author:
+        Follow.objects.get_or_create(user=request.user, author=author)
     return redirect('posts:profile', username)
 
 
 @login_required
 def profile_unfollow(request, username):
-    Follow.objects.filter(
-        user=request.user, author=User.objects.get(username=username)).delete()
+    # Очень похоже, что проверку автора можно убрать,
+    # ведь нас интересует только наличие объекта Follow,
+    # если автора нет, то и проверка Follow вернёт "404", однако,
+    # из существоваия автора всего лишь проистекает дополнительный запрос
+    author = get_object_or_404(User, username=username)
+    get_object_or_404(Follow, user=request.user, author=author).delete()
     return redirect('posts:profile', username)
 
 

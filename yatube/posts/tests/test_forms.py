@@ -8,11 +8,13 @@ from django.urls import reverse
 from ..models import Comment, Follow, Group, Post, User
 
 
+settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+
+
 class FormTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         cls.USER = 'User'
         cls.USER_2 = 'User_2'
         cls.TEXT = 'Test text'
@@ -41,7 +43,6 @@ class FormTest(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Метод shutil.rmtree удаляет директорию и всё её содержимое
         shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
         super().tearDownClass()
 
@@ -210,36 +211,58 @@ class FormTest(TestCase):
             data={'text': FormTest.TEXT_2},
             follow=True
         )
+        # Комментарий создался с верными данными
+        self.assertTrue(Comment.objects.filter(post=FormTest.POST.id,
+                                               author=FormTest.user,
+                                               text=FormTest.TEXT_2))
+        # перенаправление на страницу поста после комментирования
         self.assertRedirects(
             response,
             f'/{FormTest.USER}/{FormTest.POST.id}/',
             HTTPStatus.FOUND
         )
+        # комметариев должно стать на 1 больше
         self.assertEqual(
             Comment.objects.filter(post=FormTest.POST.id).count(), comments + 1
         )
+        # На всякий случай проверим, что количество постов не изменилось
         self.assertEqual(Post.objects.count(), self.posts_count)
 
-    def test_follow_unfollow_selffollow(self):
+    def test_follow(self):
         follow_count = Follow.objects.count()
         self.authorized_client.post(reverse(
             'posts:profile_follow', kwargs={'username': FormTest.USER_2}),
             follow=True)
-
+        # количество подписок должно увеличиться на 1
         self.assertEqual(Follow.objects.count(), follow_count + 1)
+        # Подписка создалась с верными данными
         self.assertTrue(Follow.objects.filter(user=FormTest.user,
                                               author=FormTest.user_2))
+        # На всякий случай проверим, что обратной подписки не создалось
         self.assertFalse(Follow.objects.filter(user=FormTest.user_2,
                                                author=FormTest.user))
 
+    def test_unfollow(self):
+        self.authorized_client.post(reverse(
+            'posts:profile_follow', kwargs={'username': FormTest.USER_2}),
+            follow=True)
+        follow_count = Follow.objects.count()
         self.authorized_client.post(reverse(
             'posts:profile_unfollow', kwargs={'username': FormTest.USER_2}),
             follow=True)
-        self.assertEqual(Follow.objects.count(), follow_count)
+        # количество подписок должно уменьшиться на 1
+        self.assertEqual(Follow.objects.count(), follow_count - 1)
+        # Подписка с переданными данными не должна существовать
         self.assertFalse(Follow.objects.filter(user=FormTest.user,
                                                author=FormTest.user_2))
 
+    def test_unable_selffollow(self):
+        follow_count = Follow.objects.count()
         self.authorized_client.post(reverse(
-            'posts:profile_unfollow', kwargs={'username': FormTest.USER}),
+            'posts:profile_follow', kwargs={'username': FormTest.USER}),
             follow=True)
+        # количество подписок должно измениться
         self.assertEqual(Follow.objects.count(), follow_count)
+        # Подписка с переданными данными не должна существовать
+        self.assertFalse(Follow.objects.filter(user=FormTest.user,
+                                               author=FormTest.user))

@@ -70,7 +70,8 @@ class Follow(models.Model):
                                verbose_name='Автор')
 
     class Meta:
-        unique_together = 'user', 'author'
+        models.UniqueConstraint = (
+            ['user', 'author'], '%(app_label)s_%(class)s_is_adult')
 
     def __str__(self) -> str:
         return f'{self.user.username} --> {self.author.username}'
