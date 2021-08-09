@@ -49,6 +49,8 @@ def post_view(request, username, post_id):
 
 
 @login_required
+# функция создана и принимает данные согласно тестам
+# изначально весь функционал был реализован в post_view()
 def add_comment(request, username, post_id):
     post = get_object_or_404(Post, id=post_id, author__username=username)
     form = CommentForm(request.POST or None)
@@ -93,8 +95,7 @@ def post_edit(request, username, post_id):
 
 @login_required
 def follow_index(request):
-    authors = [i.author for i in Follow.objects.filter(user=request.user)]
-    post_list = Post.objects.filter(author__in=authors)
+    post_list = Post.objects.filter(author__following__user=request.user)
     page = paginator_in_view(request, post_list)
     return render(request, 'posts/follow.html', {'page': page})
 
