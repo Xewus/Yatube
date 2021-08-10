@@ -10,7 +10,7 @@ from ..models import Comment, Follow, Group, Post, User
 TEST_DIR = settings.BASE_DIR + '/test_data'
 
 
-@override_settings(MEDIA_ROOT=(TEST_DIR + '/media_test'))
+@override_settings(MEDIA_ROOT=TEST_DIR)
 class FormTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -40,6 +40,11 @@ class FormTest(TestCase):
             description=cls.DESC_2,
             slug=cls.SLUG_2
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEST_DIR, ignore_errors=True)
 
     def setUp(self):
         self.guest_client = Client()
@@ -259,6 +264,3 @@ class FormTest(TestCase):
         # Подписка с переданными данными не должна существовать
         self.assertFalse(Follow.objects.filter(user=FormTest.user,
                                                author=FormTest.user))
-
-
-shutil.rmtree(TEST_DIR, ignore_errors=True)

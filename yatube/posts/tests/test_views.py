@@ -12,7 +12,7 @@ from ..models import Comment, Follow, Group, Post, User
 TEST_DIR = settings.BASE_DIR + '/test_data'
 
 
-@override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
+@override_settings(MEDIA_ROOT=TEST_DIR)
 class ViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -65,6 +65,11 @@ class ViewsTest(TestCase):
                 text=cls.TEXT_2, author=cls.user, group=cls.group_1
             ) for i in range(POSTS_ON_PAGE + 1)
         ])
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEST_DIR, ignore_errors=True)
 
     def setUp(self):
         self.client_1 = Client()
@@ -193,6 +198,3 @@ class ViewsTest(TestCase):
         self.assertEqual(Comment.objects.count(), comments)
         # На всякий случай проверим, что количество постов не изменилось
         self.assertEqual(Post.objects.count(), posts_count)
-
-
-shutil.rmtree(TEST_DIR, ignore_errors=True)
