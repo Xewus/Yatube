@@ -12,6 +12,7 @@ from ..models import Comment, Follow, Group, Post, User
 TEST_DIR = settings.BASE_DIR + '/test_data'
 
 
+@override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
 class ViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -140,7 +141,7 @@ class ViewsTest(TestCase):
         self.assertEqual(first_object, Post.objects.first())
 
     def test_post_doesnt_comes_to_unfollower(self):
-        # Допускаем, что подписка может существовать из-за лействий извне
+        # Допускаем, что подписка может существовать из-за действий извне
         # и удаляем
         Follow.objects.all().delete()
         content_1 = self.client_1.get(reverse('posts:follow_index')).content
@@ -150,7 +151,6 @@ class ViewsTest(TestCase):
         self.assertEqual(content_1, content_2)
         self.assertEqual(Post.objects.count(), posts_count + 1)
 
-    @override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
     def test_context_with_image(self):
         small_gif = (b'\x47\x49\x46\x38\x39\x61\x02\x00'
                      b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -195,9 +195,4 @@ class ViewsTest(TestCase):
         self.assertEqual(Post.objects.count(), posts_count)
 
 
-def tearDownModule():
-    print("\nDeleting temporary files...\n")
-    try:
-        shutil.rmtree(TEST_DIR)
-    except OSError:
-        pass
+shutil.rmtree(TEST_DIR, ignore_errors=True)

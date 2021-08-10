@@ -108,12 +108,8 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
-    # Очень похоже, что проверку автора можно убрать,
-    # ведь нас интересует только наличие объекта Follow,
-    # если автора нет, то и проверка Follow вернёт "404", однако,
-    # из существоваия автора всего лишь проистекает дополнительный запрос
-    author = get_object_or_404(User, username=username)
-    get_object_or_404(Follow, user=request.user, author=author).delete()
+    Follow.objects.filter(
+        user=request.user, author__username=username).delete()
     return redirect('posts:profile', username)
 
 

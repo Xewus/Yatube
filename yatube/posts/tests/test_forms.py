@@ -10,6 +10,7 @@ from ..models import Comment, Follow, Group, Post, User
 TEST_DIR = settings.BASE_DIR + '/test_data'
 
 
+@override_settings(MEDIA_ROOT=(TEST_DIR + '/media_test'))
 class FormTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -85,7 +86,6 @@ class FormTest(TestCase):
         self.assertFalse(Post.objects.filter(
             text=FormTest.TEXT, group=FormTest.group_2))
 
-    @override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
     def test_create_post_with_picture(self):
         small_gif = (b'\x47\x49\x46\x38\x39\x61\x02\x00'
                      b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -238,9 +238,7 @@ class FormTest(TestCase):
                                                author=FormTest.user))
 
     def test_unfollow(self):
-        self.authorized_client.post(reverse(
-            'posts:profile_follow', kwargs={'username': FormTest.USER_2}),
-            follow=True)
+        Follow.objects.create(user=FormTest.user, author=FormTest.user_2)
         follow_count = Follow.objects.count()
         self.authorized_client.post(reverse(
             'posts:profile_unfollow', kwargs={'username': FormTest.USER_2}),
@@ -263,9 +261,4 @@ class FormTest(TestCase):
                                                author=FormTest.user))
 
 
-def tearDownModule():
-    print("\nDeleting temporary files...\n")
-    try:
-        shutil.rmtree(TEST_DIR)
-    except OSError:
-        pass
+shutil.rmtree(TEST_DIR, ignore_errors=True)
