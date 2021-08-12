@@ -63,7 +63,7 @@ def add_comment(request, username, post_id):
 
 @login_required
 def new_post(request):
-    form = PostForm(request.POST or None, files=request.FILES)
+    form = PostForm(request.POST or None, files=request.FILES or None)
     if not form.is_valid():
         context = {'form': form, 'is_edit': False}
         return render(request, 'posts/new.html', context)
