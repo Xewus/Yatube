@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 from yatube.settings import POSTS_ON_PAGE
 from .forms import CommentForm, PostForm
-from .models import Comment, Follow, Group, Post, User
+from .models import Follow, Group, Post, User
 
 
 def paginator_in_view(request, post_list):
@@ -15,26 +15,23 @@ def paginator_in_view(request, post_list):
 
 @cache_page(20, key_prefix='index_page')
 def index(request):
-    post_list = Post.objects.all()
-    page = paginator_in_view(request, post_list)
+    page = paginator_in_view(request, Post.objects.all())
     return render(request, 'posts/index.html', {'page': page})
 
 
-def group_posts(request, slug=''):
+def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    post_list = group.posts.all()
-    page = paginator_in_view(request, post_list)
+    page = paginator_in_view(request, group.posts.all())
     context = {'group': group, 'page': page}
     return render(request, 'posts/group.html', context)
 
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    post_list = author.posts.all()
-    page = paginator_in_view(request, post_list)
-    following = False
-    if request.user.is_authenticated:
-        following = author.following.filter(user=request.user).exists()
+    page = paginator_in_view(request, author.posts.all())
+    following = (
+        request.user.is_authenticated and author.following.filter(
+            user=request.user).exists())
     context = {'author': author, 'page': page, 'following': following}
     return render(request, 'posts/profile.html', context)
 
@@ -43,8 +40,7 @@ def post_view(request, username, post_id):
     if request.user.is_authenticated:
         return add_comment(request, username, post_id)
     post = get_object_or_404(Post, id=post_id, author__username=username)
-    comments = Comment.objects.filter(post__id=post_id)
-    context = {'post': post, 'comments': comments, 'form': CommentForm()}
+    context = {'post': post, 'form': CommentForm()}
     return render(request, 'posts/post.html', context)
 
 
@@ -100,8 +96,8 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    author = get_object_or_404(User, username=username)
-    if request.user != author:
+    if request.user.username != username:
+        author = get_object_or_404(User, username=username)
         Follow.objects.get_or_create(user=request.user, author=author)
     return redirect('posts:profile', username)
 

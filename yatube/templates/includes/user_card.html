@@ -19,7 +19,7 @@
     <li class="list-group-item">
       <div class="h6 text-muted">
         <!--Количество записей -->
-        Записей: {{ author.posts.count }}
+        Записей: {{ page.paginator.count }}
       </div>
       {% if request.user != author %}
         <li class="list-group-item">

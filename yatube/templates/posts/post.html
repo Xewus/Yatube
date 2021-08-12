@@ -4,7 +4,7 @@
 
   <div class="container">
     {% include "includes/post_item.html" with post=post %}
-    {% include 'includes/comments.html' %}
+    {% include 'includes/comments.html' with comments=post.comments.all %}
   </div>
 
   {% include "includes/paginator.html" with items=page paginator=paginator%}

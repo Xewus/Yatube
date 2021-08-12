@@ -146,8 +146,6 @@ class ViewsTest(TestCase):
         self.assertEqual(first_object, Post.objects.first())
 
     def test_post_doesnt_comes_to_unfollower(self):
-        # Допускаем, что подписка может существовать из-за действий извне
-        # и удаляем
         Follow.objects.all().delete()
         content_1 = self.client_1.get(reverse('posts:follow_index')).content
         posts_count = Post.objects.count()

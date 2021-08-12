@@ -9,14 +9,19 @@
   <div class="card-body">
     <p class="card-text">
       <!-- Ссылка на автора через @ -->
-      <a name="post_{{ post.id }}" href="{% url 'posts:profile' post.author.username %}">
-        <strong class="d-block text-gray-dark">@{{ post.author }}</strong>
-      </a>
+        <a name="post_{{ post.id }}" href="{% url 'posts:profile' post.author.username %}">
+          <strong class="d-block text-gray-dark">@{{ post.author }}</strong>
+        </a>
+      
       {{ post.text|linebreaksbr }}
     </p>
 
     <!-- Если пост относится к какому-нибудь сообществу, то отобразим ссылку на него через # -->
-    {% if post.group %}
+    {% if group %}
+      <a class="card-link muted" href="{% url 'posts:group' group.slug %}">
+        <strong class="d-block text-gray-dark">#{{ group.title }}</strong>
+      </a>
+    {% elif post.group %}
       <a class="card-link muted" href="{% url 'posts:group' post.group.slug %}">
         <strong class="d-block text-gray-dark">#{{ post.group.title }}</strong>
       </a>
@@ -29,9 +34,9 @@
           <div>
             Комментариев: {{ post.comments.count }}    
           </div>
-        {% endif %}
+       {% endif %}
         <a class="btn btn-sm btn-primary" href="{% url 'posts:post' post.author.username post.id %}" role="button">
-          Добавить комментарий
+          Полный текст
         </a>
 
         <!-- Ссылка на редактирование поста для автора -->
