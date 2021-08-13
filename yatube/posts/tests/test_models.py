@@ -36,7 +36,7 @@ class ModelTests(TestCase):
         )
         cls.model_str = {
             cls.comment: cls.comment.text[:15],
-            cls.follow: 'qaz --> Qwerty',
+            cls.follow: 'qaz-->Qwerty',
             cls.group: cls.group.title,
             cls.post: cls.post.text[:15],
         }
