@@ -31,20 +31,22 @@
     <!-- Отображение ссылки на комментарии -->
     <div class="d-flex justify-content-between align-items-center">
       <div class="btn-group">
+        {% if not slice_not %}
+          <a class="btn btn-sm btn-primary" href="{% url 'posts:post' post.author.username post.id %}" role="button">
+            Полный текст
+          </a>
+        {% endif %}
+        <!-- Ссылка на редактирование поста для автора -->
+        {% if slice_not and user == post.author %}
+            <a class="btn btn-sm btn-info" href="{% url 'posts:post_edit' post.author.username post.id %}" role="button">
+              Редактировать
+            </a>
+          {% endif %}
+
         {% if post.comments.exists %}
           <div>
-            Комментариев: {{ post.comments.count }}    
+              Комментариев: {{ post.comments.count }}    
           </div>
-       {% endif %}
-        <a class="btn btn-sm btn-primary" href="{% url 'posts:post' post.author.username post.id %}" role="button">
-          Полный текст
-        </a>
-
-        <!-- Ссылка на редактирование поста для автора -->
-        {% if user == post.author %}
-          <a class="btn btn-sm btn-info" href="{% url 'posts:post_edit' post.author.username post.id %}" role="button">
-            Редактировать
-          </a>
         {% endif %}
       </div>
 
