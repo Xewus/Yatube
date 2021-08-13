@@ -15,20 +15,26 @@ def paginator_in_view(request, post_list):
 
 @cache_page(20, key_prefix='index_page')
 def index(request):
-    page = paginator_in_view(request, Post.objects.all())
+    post_list = Post.objects.all().select_related(
+        'author', 'group').prefetch_related('comments')
+    page = paginator_in_view(request, post_list)
     return render(request, 'posts/index.html', {'page': page})
 
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    page = paginator_in_view(request, group.posts.all())
+    post_list = Post.objects.filter(group=group).select_related(
+        'author', 'group').prefetch_related('comments')
+    page = paginator_in_view(request, post_list)
     context = {'group': group, 'page': page}
     return render(request, 'posts/group.html', context)
 
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    page = paginator_in_view(request, author.posts.all())
+    post_list = Post.objects.filter(author=author).select_related(
+        'author', 'group').prefetch_related('comments')
+    page = paginator_in_view(request, post_list)
     following = (
         request.user.is_authenticated
         and request.user.username != username
@@ -87,7 +93,9 @@ def post_edit(request, username, post_id):
 
 @login_required
 def follow_index(request):
-    post_list = Post.objects.filter(author__following__user=request.user)
+    post_list = Post.objects.filter(
+        author__following__user=request.user).select_related(
+            'author', 'group').prefetch_related('comments')
     page = paginator_in_view(request, post_list)
     return render(request, 'posts/follow.html', {'page': page})
 

@@ -38,11 +38,10 @@
         {% endif %}
         <!-- Ссылка на редактирование поста для автора -->
         {% if slice_not and user == post.author %}
-            <a class="btn btn-sm btn-info" href="{% url 'posts:post_edit' post.author.username post.id %}" role="button">
-              Редактировать
-            </a>
-          {% endif %}
-
+          <a class="btn btn-sm btn-info" href="{% url 'posts:post_edit' post.author.username post.id %}" role="button">
+            Редактировать
+          </a>
+        {% endif %}
         {% if post.comments.exists %}
           <div>
               Комментариев: {{ post.comments.count }}    

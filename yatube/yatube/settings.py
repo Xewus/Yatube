@@ -7,7 +7,7 @@ SECRET_KEY = '3ac)%m1=ihp5jgmdm5$^jrjkia5y8yx#z$3=57=@ih1j6lvwao'
 
 DEBUG = True
 
-ALLOWED_HOSTS = [
+ALLOWED_HOSTS = ['www.my-ya.xyz',
                  'www.xewus.pythonanywhere.com',
                  'xewus.pythonanywhere.com',
                  'localhost',
@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
- #   'django.contrib.staticfiles',
+#   'django.contrib.staticfiles',
     'debug_toolbar',
     'sorl.thumbnail',
 ]
@@ -97,6 +97,7 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+#  STATIC_FILES = os.path.join(BASE_DIR, 'static')
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
