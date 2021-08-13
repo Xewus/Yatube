@@ -50,8 +50,8 @@ def add_comment(request, username, post_id):
     post = get_object_or_404(Post, id=post_id, author__username=username)
     form = CommentForm(request.POST or None)
     if not form.is_valid():
-        return render(
-            request, 'posts/post.html', {'post': post, 'form': form})
+        context = {'post': post, 'form': form}
+        return render(request, 'posts/post.html', context)
     instance = form.save(commit=False)
     instance.author = request.user
     instance.post = post
