@@ -3,7 +3,7 @@
 {% block content %}
 
   <div class="container">
-    {% include "includes/post_item.html" with post=post %}
+    {% include "includes/post_item.html" with post=post slice_not=True %}
     {% include 'includes/comments.html' with comments=post.comments.all %}
   </div>
 

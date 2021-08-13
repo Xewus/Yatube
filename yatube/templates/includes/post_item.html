@@ -12,8 +12,11 @@
         <a name="post_{{ post.id }}" href="{% url 'posts:profile' post.author.username %}">
           <strong class="d-block text-gray-dark">@{{ post.author }}</strong>
         </a>
-      
-      {{ post.text|linebreaksbr }}
+        {% if slice_not %}
+          {{ post.text|linebreaks|urlize }}
+        {% else %}
+          {{ post.text|linebreaks|truncatewords:30|urlize }}
+        {% endif %}
     </p>
 
     <!-- Если пост относится к какому-нибудь сообществу, то отобразим ссылку на него через # -->
