@@ -18,9 +18,7 @@
 
     <!-- Если пост относится к какому-нибудь сообществу, то отобразим ссылку на него через # -->
     {% if group %}
-      <a class="card-link muted" href="{% url 'posts:group' group.slug %}">
-        <strong class="d-block text-gray-dark">#{{ group.title }}</strong>
-      </a>
+    
     {% elif post.group %}
       <a class="card-link muted" href="{% url 'posts:group' post.group.slug %}">
         <strong class="d-block text-gray-dark">#{{ post.group.title }}</strong>

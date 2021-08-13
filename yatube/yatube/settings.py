@@ -7,7 +7,8 @@ SECRET_KEY = '3ac)%m1=ihp5jgmdm5$^jrjkia5y8yx#z$3=57=@ih1j6lvwao'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.xewus.pythonanywhere.com',
+ALLOWED_HOSTS = [
+                 'www.xewus.pythonanywhere.com',
                  'xewus.pythonanywhere.com',
                  'localhost',
                  '127.0.0.1',
