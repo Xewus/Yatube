@@ -76,9 +76,9 @@ def new_post(request):
 
 @login_required
 def post_edit(request, username, post_id):
-    post = get_object_or_404(Post, id=post_id, author__username=username)
-    if post.author != request.user:
+    if request.user.username != username:
         return redirect('posts:index')
+    post = get_object_or_404(Post, id=post_id, author__username=username)
     form = PostForm(request.POST or None,
                     files=request.FILES or None, instance=post)
     if not form.is_valid():
