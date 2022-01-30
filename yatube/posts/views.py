@@ -15,26 +15,20 @@ def paginator_in_view(request, post_list):
 
 @cache_page(20, key_prefix='index_page')
 def index(request):
-    post_list = Post.objects.all().select_related(
-        'author', 'group').prefetch_related('comments')
-    page = paginator_in_view(request, post_list)
+    page = paginator_in_view(request, Post.objects.all())
     return render(request, 'posts/index.html', {'page': page})
 
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    post_list = Post.objects.filter(group=group).select_related(
-        'author', 'group').prefetch_related('comments')
-    page = paginator_in_view(request, post_list)
+    page = paginator_in_view(request, group.posts.all())
     context = {'group': group, 'page': page}
     return render(request, 'posts/group.html', context)
 
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    post_list = Post.objects.filter(author=author).select_related(
-        'author', 'group').prefetch_related('comments')
-    page = paginator_in_view(request, post_list)
+    page = paginator_in_view(request, author.posts.all())
     following = (
         request.user.is_authenticated
         and request.user.username != username
@@ -56,8 +50,11 @@ def add_comment(request, username, post_id):
     post = get_object_or_404(Post, id=post_id, author__username=username)
     form = CommentForm(request.POST or None)
     if not form.is_valid():
-        context = {'post': post, 'form': form}
-        return render(request, 'posts/post.html', context)
+        return render(
+            request, 'posts/post.html', {'post': post,
+                                         'comments': post.comments.all(),
+                                         'form': form}
+        )
     instance = form.save(commit=False)
     instance.author = request.user
     instance.post = post
@@ -79,9 +76,9 @@ def new_post(request):
 
 @login_required
 def post_edit(request, username, post_id):
-    if request.user.username != username:
-        return redirect('posts:index')
     post = get_object_or_404(Post, id=post_id, author__username=username)
+    if post.author != request.user:
+        return redirect('posts:index')
     form = PostForm(request.POST or None,
                     files=request.FILES or None, instance=post)
     if not form.is_valid():
@@ -93,9 +90,7 @@ def post_edit(request, username, post_id):
 
 @login_required
 def follow_index(request):
-    post_list = Post.objects.filter(
-        author__following__user=request.user).select_related(
-            'author', 'group').prefetch_related('comments')
+    post_list = Post.objects.filter(author__following__user=request.user)
     page = paginator_in_view(request, post_list)
     return render(request, 'posts/follow.html', {'page': page})
 

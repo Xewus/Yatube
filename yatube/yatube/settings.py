@@ -1,20 +1,17 @@
 import os
+from pathlib import Path
 
+from decouple import Csv, config
+
+DEBUG = 1# config('DEBUG', default=False, cast=bool)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = '3ac)%m1=ihp5jgmdm5$^jrjkia5y8yx#z$3=57=@ih1j6lvwao'
+SECRET_KEY = config('SECRET_KEY', default='string_from_.env')
 
-DEBUG = True
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
 
-ALLOWED_HOSTS = ['www.my-ya.xyz',
-                 'www.xewus.pythonanywhere.com',
-                 'xewus.pythonanywhere.com',
-                 'localhost',
-                 '127.0.0.1',
-                 '[::1]',
-                 'testserver']
-INTERNAL_IPS = ['127.0.0.1', ]
+INTERNAL_IPS = []
 
 INSTALLED_APPS = [
     'about.apps.AboutConfig',
@@ -25,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-#   'django.contrib.staticfiles',
+    # 'django.contrib.staticfiles',
     'debug_toolbar',
     'sorl.thumbnail',
 ]
@@ -82,7 +79,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
 CACHES = {
     'default': {
@@ -105,5 +102,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = 'posts:index'
-
+LOGOUT_REDIRECT_URL = 'https://www.youtube.com/watch?v=IA_evL-1F0wэ'
 POSTS_ON_PAGE = 10

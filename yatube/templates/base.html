@@ -1,24 +1,22 @@
 <!DOCTYPE html> <!-- Используется html 5 версии -->
 <html lang="ru"> <!-- Язык сайта - русский -->
-{% load static %}  
-<link rel="apple-touch-icon" sizes="180x180" href="{%  static 'apple-touch-icon.png' %}">
-<link rel="icon" type="image/png" sizes="32x32" href="{% static favicon 'favicon-32x32.png' %}">
-<link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16x16.png' %}">
+{% load static %}
   <head>
     {% include 'includes/head.html' %}
     <title>{% block title %}SupaDupaFly{% endblock %}</title>
   </head>
 
   <body>
-    {% include 'includes/nav.html' %}
-    <main>
-      <div class="container">
-      <h1>{% block header %}{% endblock %}</h1>
-        {% block content %}
-          <!-- Содержимое страницы -->
-        {% endblock content %}        
-      </div>
-    </main>
-    {% include 'includes/footer.html' %} 
+    <div style= 'background-image: linear-gradient(to top, #feada6 0%, #f5efef 100%);'>
+      {% include 'includes/nav.html' %}
+      <main>
+        <div class="container">
+          <h1>{% block header %}{% endblock %}</h1>
+          {% block content %}
+          {% endblock content %}
+        </div>
+      </main>
+      {% include 'includes/footer.html' %}
+    </div>
   </body>
 </html>

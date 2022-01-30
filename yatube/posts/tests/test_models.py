@@ -36,7 +36,7 @@ class ModelTests(TestCase):
         )
         cls.model_str = {
             cls.comment: cls.comment.text[:15],
-            cls.follow: 'qaz-->Qwerty',
+            cls.follow: 'qaz --> Qwerty',
             cls.group: cls.group.title,
             cls.post: cls.post.text[:15],
         }
@@ -66,14 +66,14 @@ class ModelTests(TestCase):
                 text = ModelTests.form_post.fields[text].help_text
                 self.assertEqual(text, value)
 
-    def test_labels_comment(self):
+    def test_labels_post(self):
         labels = {'text': 'Текст комментария'}
         for label, value in labels.items():
             with self.subTest(label=label):
                 label = ModelTests.form_comment.fields[label].label
                 self.assertEqual(label, value)
 
-    def test_help_texts_comment(self):
+    def test_help_texts_post(self):
         help_texts = {'text': 'Вставьте свои пять копеек'}
         for text, value in help_texts.items():
             with self.subTest(text=text):
