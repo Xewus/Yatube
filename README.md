@@ -40,4 +40,4 @@ python yatube/manage.py createsuperuser
 ```
 python yatube/manage.py runserver
 ```
-![Иллюстрация к проекту](https://github.com/Xewus/Foodgram/blob/master/screen.png)
+![Иллюстрация к проекту](https://github.com/Xewus/Yatube/blob/master/screen.png)
