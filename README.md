@@ -5,7 +5,7 @@
 *This is final project of the 5th sprint (the third month of training from nothing).*
 
 ### Example:
-##  https://my-ya.xyz/
+##  https://my-ya.ml/
 
 Uses:
 - Download this repo
